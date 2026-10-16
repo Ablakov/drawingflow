@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DrawingFlow.Domain\DrawingFlow.Domain.csproj" />
+    <ProjectReference Include="..\..\src\DrawingFlow.Application\DrawingFlow.Application.csproj" />
+    <ProjectReference Include="..\..\src\DrawingFlow.Infrastructure\DrawingFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\DrawingFlow.Client\DrawingFlow.Client.csproj" />
+    <ProjectReference Include="..\..\src\DrawingFlow.Agent\DrawingFlow.Agent.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,172 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Pages.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel}">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.PageTitle}" />
+      <ProgressBar Style="{StaticResource ProgressBar.Thin}" Margin="0,0,0,8" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+      <Border Style="{StaticResource Border.ErrorBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Content="Повторить" Style="{StaticResource Button.Link}" Command="{Binding RefreshCommand}" />
+          <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" VerticalAlignment="Center" />
+        </DockPanel>
+      </Border>
+
+      <!-- Карточки -->
+      <UniformGrid Columns="3" Margin="0,0,0,16">
+        <Border Style="{StaticResource Border.Card}" Margin="0,0,12,0">
+          <StackPanel>
+            <TextBlock Text="Организация" Style="{StaticResource Text.Small}" />
+            <TextBlock Text="{Binding Organization.Name, FallbackValue='—'}" FontSize="17" FontWeight="SemiBold" Margin="0,6,0,2" TextTrimming="CharacterEllipsis" />
+            <TextBlock Style="{StaticResource Text.Muted}">
+              <Run Text="{Binding Organization.Code, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding OrganizationRoleName, Mode=OneWay}" />
+            </TextBlock>
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Border.Card}" Margin="0,0,12,0">
+          <StackPanel>
+            <TextBlock Text="Проекты" Style="{StaticResource Text.Small}" />
+            <TextBlock Text="{Binding Organization.ProjectCount, FallbackValue='0'}" Style="{StaticResource Text.Metric}" Margin="0,2,0,0" />
+            <Button Content="Открыть проекты" Style="{StaticResource Button.Link}" HorizontalAlignment="Left" Margin="-6,4,0,0" Command="{Binding OpenProjectsCommand}" />
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Border.Card}">
+          <StackPanel>
+            <TextBlock Text="Участники организации" Style="{StaticResource Text.Small}" />
+            <TextBlock Text="{Binding Organization.MemberCount, FallbackValue='0'}" Style="{StaticResource Text.Metric}" Margin="0,2,0,0" />
+            <Button Content="Открыть список" Style="{StaticResource Button.Link}" HorizontalAlignment="Left" Margin="-6,4,0,0" Command="{Binding OpenMembersCommand}" />
+          </StackPanel>
+        </Border>
+      </UniformGrid>
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="3*" />
+          <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Недавние проекты -->
+        <Border Grid.Column="0" Style="{StaticResource Border.Card}" Margin="0,0,12,0" VerticalAlignment="Top">
+          <StackPanel>
+            <TextBlock Text="Недавно изменённые проекты" Style="{StaticResource Text.SectionTitle}" />
+            <TextBlock Text="Проектов пока нет." Style="{StaticResource Text.Muted}" Visibility="{Binding RecentProjects.Count, Converter={StaticResource ZeroToVisibility}}" />
+            <ItemsControl ItemsSource="{Binding RecentProjects}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,0,0,1" Padding="0,8">
+                    <DockPanel>
+                      <Button DockPanel.Dock="Right" Content="Открыть" Style="{StaticResource Button.RowAction}" VerticalAlignment="Center"
+                              Command="{Binding DataContext.OpenProjectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                      <TextBlock DockPanel.Dock="Right" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="12,0"
+                                 Text="{Binding UpdatedAtUtc, Converter={StaticResource LocalDateTime}}" />
+                      <StackPanel>
+                        <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                          <Run Text="{Binding Code, Mode=OneWay}" /><Run Text=" — " /><Run Text="{Binding Name, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource Text.Small}">
+                          <Run Text="{Binding Status, Converter={StaticResource DisplayName}, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding CurrentUserRole, Converter={StaticResource DisplayName}, Mode=OneWay}" />
+                        </TextBlock>
+                      </StackPanel>
+                    </DockPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Сервер и события -->
+        <StackPanel Grid.Column="1">
+          <Border Style="{StaticResource Border.Card}" Margin="0,0,0,12">
+            <StackPanel>
+              <TextBlock Text="Недавние изменения документов" Style="{StaticResource Text.SectionTitle}" />
+              <TextBlock Text="Документов пока нет." Style="{StaticResource Text.Muted}" Visibility="{Binding RecentDocuments.Count, Converter={StaticResource ZeroToVisibility}}" />
+              <ItemsControl ItemsSource="{Binding RecentDocuments}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,0,0,1" Padding="0,6">
+                      <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Открыть" Style="{StaticResource Button.RowAction}" VerticalAlignment="Center"
+                                Command="{Binding DataContext.OpenDocumentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                        <StackPanel>
+                          <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                            <Run Text="{Binding DocumentNumber, Mode=OneWay}" /><Run Text=" — " /><Run Text="{Binding Title, Mode=OneWay}" />
+                          </TextBlock>
+                          <TextBlock Style="{StaticResource Text.Small}">
+                            <Run Text="{Binding ProjectCode, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding Status, Converter={StaticResource DisplayName}, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding UpdatedAtUtc, Converter={StaticResource LocalDateTime}, Mode=OneWay}" />
+                          </TextBlock>
+                        </StackPanel>
+                      </DockPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource Border.Card}" Margin="0,0,0,12" Visibility="{Binding WorkflowSummary, Converter={StaticResource NotNullToVisibility}}">
+            <StackPanel>
+              <TextBlock Text="Согласование" Style="{StaticResource Text.SectionTitle}" />
+              <UniformGrid Columns="2">
+                <StackPanel>
+                  <TextBlock Text="Мои согласования" Style="{StaticResource Text.Small}" />
+                  <TextBlock Text="{Binding WorkflowSummary.MyOpenReviews}" Style="{StaticResource Text.Metric}" />
+                </StackPanel>
+                <StackPanel>
+                  <TextBlock Text="Мои задачи на доработку" Style="{StaticResource Text.Small}" />
+                  <TextBlock Text="{Binding WorkflowSummary.MyOpenReworks}" Style="{StaticResource Text.Metric}" />
+                </StackPanel>
+              </UniformGrid>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
+                <Run Text="Документов на проверке:" /><Run Text=" " /><Run Text="{Binding WorkflowSummary.DocumentsInReview, Mode=OneWay}" />
+                <Run Text=" · ожидают выпуска:" /><Run Text=" " /><Run Text="{Binding WorkflowSummary.DocumentsAwaitingRelease, Mode=OneWay}" />
+              </TextBlock>
+              <Button Content="Открыть задачи" Style="{StaticResource Button.Link}" HorizontalAlignment="Left" Margin="-6,4,0,0" Command="{Binding OpenTasksCommand}" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource Border.Card}" Margin="0,0,0,12">
+            <StackPanel>
+              <TextBlock Text="Синхронизация" Style="{StaticResource Text.SectionTitle}" />
+              <TextBlock Text="{Binding SyncStatusText}" Style="{StaticResource Text.Base}" />
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
+                <Run Text="В очереди:" /><Run Text=" " /><Run Text="{Binding Sync.PendingOperations, Mode=OneWay, FallbackValue=0}" />
+                <Run Text=" · ошибок:" /><Run Text=" " /><Run Text="{Binding Sync.FailedOperations, Mode=OneWay, FallbackValue=0}" />
+                <Run Text=" · требуют разрешения:" /><Run Text=" " /><Run Text="{Binding Sync.UnresolvedOperations, Mode=OneWay, FallbackValue=0}" />
+              </TextBlock>
+              <Button Content="Открыть очередь синхронизации" Style="{StaticResource Button.Link}" HorizontalAlignment="Left" Margin="-6,4,0,0" Command="{Binding OpenSyncQueueCommand}" />
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource Border.Card}" Margin="0,0,0,12">
+            <StackPanel>
+              <TextBlock Text="Сервер" Style="{StaticResource Text.SectionTitle}" />
+              <TextBlock Text="{Binding ServerAddress}" Style="{StaticResource Text.Base}" />
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
+                <Run Text="Версия сервера:" /><Run Text=" " /><Run Text="{Binding ServerVersion, Mode=OneWay}" />
+              </TextBlock>
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource Border.Card}" Visibility="{Binding CanViewAudit, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+              <TextBlock Text="Последние события" Style="{StaticResource Text.SectionTitle}" />
+              <TextBlock Text="Событий пока нет." Style="{StaticResource Text.Muted}" Visibility="{Binding RecentEvents.Count, Converter={StaticResource ZeroToVisibility}}" />
+              <ItemsControl ItemsSource="{Binding RecentEvents}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Margin="0,0,0,8">
+                      <TextBlock Text="{Binding Action, Converter={StaticResource AuditAction}}" FontWeight="SemiBold" />
+                      <TextBlock Style="{StaticResource Text.Small}">
+                        <Run Text="{Binding ActorName, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding OccurredAtUtc, Converter={StaticResource LocalDateTime}, Mode=OneWay}" />
+                      </TextBlock>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

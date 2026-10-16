@@ -1,0 +1,88 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Pages.AdministrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=vm:AdministrationViewModel}">
+  <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Title}" Style="{StaticResource Text.PageTitle}" />
+    <ProgressBar DockPanel.Dock="Top" Style="{StaticResource ProgressBar.Thin}" Margin="0,0,0,8" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.ErrorBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Повторить" Style="{StaticResource Button.Link}" Command="{Binding RefreshCommand}" />
+        <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" VerticalAlignment="Center" />
+      </DockPanel>
+    </Border>
+
+    <TabControl Background="Transparent" BorderThickness="0">
+      <TabItem Header="Организации">
+        <DockPanel Margin="0,12,0,0">
+          <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <Button DockPanel.Dock="Right" Content="Создать организацию" Style="{StaticResource Button.Primary}" Command="{Binding CreateOrganizationCommand}" />
+            <TextBlock Text="Все организации сервера" Style="{StaticResource Text.Muted}" VerticalAlignment="Center" />
+          </DockPanel>
+          <DataGrid ItemsSource="{Binding Organizations}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Код" Binding="{Binding Code}" Width="140" />
+              <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*" />
+              <DataGridTextColumn Header="Состояние" Binding="{Binding IsActive, Converter={StaticResource DisplayName}}" Width="120" />
+              <DataGridTextColumn Header="Проекты" Binding="{Binding ProjectCount}" Width="90" />
+              <DataGridTextColumn Header="Участники" Binding="{Binding MemberCount}" Width="100" />
+              <DataGridTextColumn Header="Создана" Binding="{Binding CreatedAtUtc, Converter={StaticResource LocalDateTime}, ConverterParameter='dd.MM.yyyy'}" Width="110" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Пользователи">
+        <DockPanel Margin="0,12,0,0">
+          <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <Button DockPanel.Dock="Right" Content="Создать пользователя" Style="{StaticResource Button.Primary}" Command="{Binding CreateUserCommand}" />
+            <Button DockPanel.Dock="Right" Content="Найти" Style="{StaticResource Button.Secondary}" Margin="8,0" Command="{Binding SearchUsersCommand}" />
+            <TextBox Text="{Binding UserSearch, UpdateSourceTrigger=PropertyChanged}" ToolTip="Поиск по логину и имени">
+              <TextBox.InputBindings>
+                <KeyBinding Key="Return" Command="{Binding SearchUsersCommand}" />
+              </TextBox.InputBindings>
+            </TextBox>
+          </DockPanel>
+          <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+              <Button Content="Назад" Style="{StaticResource Button.Secondary}" Command="{Binding PreviousUsersPageCommand}" />
+              <Button Content="Вперёд" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" Command="{Binding NextUsersPageCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding UsersPageInfo}" Style="{StaticResource Text.Muted}" VerticalAlignment="Center" />
+          </DockPanel>
+          <DataGrid ItemsSource="{Binding Users}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Логин" Binding="{Binding Login}" Width="150" />
+              <DataGridTextColumn Header="Имя" Binding="{Binding DisplayName}" Width="*" />
+              <DataGridTextColumn Header="Эл. почта" Binding="{Binding Email}" Width="200" />
+              <DataGridCheckBoxColumn Header="Админ. сервера" Binding="{Binding IsServerAdministrator}" Width="120" />
+              <DataGridTextColumn Header="Состояние" Binding="{Binding IsActive, Converter={StaticResource DisplayName}}" Width="110" />
+              <DataGridTextColumn Header="Последний вход" Binding="{Binding LastLoginAtUtc, Converter={StaticResource LocalDateTime}}" Width="140" />
+              <DataGridTemplateColumn Header="Действия" Width="150">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Command="{Binding DataContext.ToggleUserActiveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}">
+                      <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource Button.RowAction}">
+                          <Setter Property="Content" Value="Заблокировать" />
+                          <Setter Property="Foreground" Value="{StaticResource Brush.Danger}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsActive}" Value="False">
+                              <Setter Property="Content" Value="Разблокировать" />
+                              <Setter Property="Foreground" Value="{StaticResource Brush.Success}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Button.Style>
+                    </Button>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,25 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Dialogs.UploadVersionDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=dvm:UploadVersionDialogViewModel}">
+  <StackPanel>
+    <Border Style="{StaticResource Border.Card}" Padding="12">
+      <StackPanel>
+        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Text="{Binding FileSizeText}" Style="{StaticResource Text.Small}" />
+        <TextBlock Text="{Binding NextVersionText}" Style="{StaticResource Text.Small}" Margin="0,4,0,0" />
+      </StackPanel>
+    </Border>
+    <TextBlock Text="Комментарий к версии" Style="{StaticResource Text.FieldLabel}" />
+    <TextBox Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" VerticalScrollBarVisibility="Auto"
+             ToolTip="Что изменилось в этой версии" />
+    <StackPanel Margin="0,12,0,0" Visibility="{Binding ProgressText, Converter={StaticResource NotNullToVisibility}}">
+      <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Text.Small}" />
+      <ProgressBar Height="6" Margin="0,6,0,0" Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}" Foreground="{StaticResource Brush.Accent}" />
+    </StackPanel>
+    <TextBlock Style="{StaticResource Text.Small}" Margin="0,10,0,0"
+               Text="Перед отправкой вычисляется контрольная сумма SHA-256; сервер отклонит файл при несовпадении. Предыдущие версии остаются неизменными." />
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,26 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Dialogs.SubmitForReviewDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=dvm:SubmitForReviewDialogViewModel}">
+  <StackPanel>
+    <TextBlock Text="Проверяющие" Style="{StaticResource Text.FieldLabel}" />
+    <Border BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" Padding="8" MaxHeight="220">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Reviewers}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected}" Margin="0,2" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+    <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0" Text="Решение первого ответившего проверяющего (или руководителя проекта) определяет исход; задачи остальных закрываются." />
+    <TextBlock Text="Срок проверки" Style="{StaticResource Text.FieldLabel}" />
+    <DatePicker SelectedDate="{Binding DueDate}" Width="200" HorizontalAlignment="Left" />
+    <TextBlock Text="Поручение (необязательно)" Style="{StaticResource Text.FieldLabel}" />
+    <TextBox Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" VerticalScrollBarVisibility="Auto" />
+  </StackPanel>
+</UserControl>

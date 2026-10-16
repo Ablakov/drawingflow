@@ -1,0 +1,88 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Pages.ProjectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=vm:ProjectsViewModel}">
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+      <Button DockPanel.Dock="Right" Content="Создать проект" Style="{StaticResource Button.Primary}" VerticalAlignment="Top"
+              Command="{Binding CreateProjectCommand}" Visibility="{Binding CanCreateProjects, Converter={StaticResource BoolToVisibility}}" />
+      <TextBlock Text="{Binding Title}" Style="{StaticResource Text.PageTitle}" Margin="0" />
+    </DockPanel>
+
+    <!-- Панель поиска -->
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.Card}" Padding="12" Margin="0,0,0,12">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="Поиск по коду и названию проекта">
+          <TextBox.InputBindings>
+            <KeyBinding Key="Return" Command="{Binding SearchCommand}" />
+          </TextBox.InputBindings>
+        </TextBox>
+        <ComboBox Grid.Column="1" Width="160" Margin="8,0,0,0" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" />
+        <Button Grid.Column="2" Content="Найти" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" Command="{Binding SearchCommand}" />
+        <Button Grid.Column="3" Content="Сбросить" Style="{StaticResource Button.Link}" Margin="4,0,0,0" Command="{Binding ClearSearchCommand}" />
+        <TextBlock Grid.Column="4" Text="{Binding SortIndicator}" Style="{StaticResource Text.Small}" VerticalAlignment="Center" Margin="12,0,0,0" />
+      </Grid>
+    </Border>
+
+    <ProgressBar DockPanel.Dock="Top" Style="{StaticResource ProgressBar.Thin}" Margin="0,0,0,8" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.ErrorBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Повторить" Style="{StaticResource Button.Link}" Command="{Binding RefreshCommand}" />
+        <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" VerticalAlignment="Center" />
+      </DockPanel>
+    </Border>
+
+    <!-- Пагинация -->
+    <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button Content="Назад" Style="{StaticResource Button.Secondary}" Command="{Binding PreviousPageCommand}" />
+        <Button Content="Вперёд" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" Command="{Binding NextPageCommand}" />
+      </StackPanel>
+      <TextBlock Text="{Binding PageInfo}" Style="{StaticResource Text.Muted}" VerticalAlignment="Center" />
+    </DockPanel>
+
+    <Grid>
+      <DataGrid ItemsSource="{Binding Projects}" SelectedItem="{Binding SelectedProject}" Sorting="OnSorting">
+        <DataGrid.RowStyle>
+          <Style TargetType="DataGridRow">
+            <EventSetter Event="MouseDoubleClick" Handler="OnRowDoubleClick" />
+            <Setter Property="Cursor" Value="Hand" />
+          </Style>
+        </DataGrid.RowStyle>
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Код" Binding="{Binding Code}" Width="140" SortMemberPath="Code" />
+          <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*" SortMemberPath="Name" />
+          <DataGridTextColumn Header="Статус" Binding="{Binding Status, Converter={StaticResource DisplayName}}" Width="110" CanUserSort="False" />
+          <DataGridTextColumn Header="Моя роль" Binding="{Binding CurrentUserRole, Converter={StaticResource DisplayName}}" Width="170" CanUserSort="False" />
+          <DataGridTextColumn Header="Участники" Binding="{Binding MemberCount}" Width="100" CanUserSort="False" />
+          <DataGridTextColumn Header="Изменён" Binding="{Binding UpdatedAtUtc, Converter={StaticResource LocalDateTime}}" Width="140" SortMemberPath="UpdatedAt" />
+          <DataGridTemplateColumn Width="90" CanUserSort="False">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Button Content="Открыть" Style="{StaticResource Button.RowAction}"
+                        Command="{Binding DataContext.OpenSelectedCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+      <Border Style="{StaticResource Border.Card}" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="32"
+              Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}">
+        <StackPanel>
+          <TextBlock Text="Проекты не найдены" Style="{StaticResource Text.SectionTitle}" HorizontalAlignment="Center" />
+          <TextBlock Style="{StaticResource Text.Muted}" TextAlignment="Center"
+                     Text="Измените условия поиска или создайте новый проект, если у вас есть права руководителя организации." />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

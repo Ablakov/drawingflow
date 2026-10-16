@@ -1,0 +1,21 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Dialogs.OrganizationMemberDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=dvm:OrganizationMemberDialogViewModel}">
+  <StackPanel>
+    <StackPanel Visibility="{Binding IsCreate, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="Логин пользователя" Style="{StaticResource Text.FieldLabel}" />
+      <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" ToolTip="Пользователь должен быть уже зарегистрирован на сервере" />
+    </StackPanel>
+    <StackPanel Visibility="{Binding IsEdit, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="Участник" Style="{StaticResource Text.FieldLabel}" />
+      <TextBlock Text="{Binding MemberDisplayName}" FontWeight="SemiBold" />
+    </StackPanel>
+    <TextBlock Text="Роль в организации" Style="{StaticResource Text.FieldLabel}" />
+    <ComboBox ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}" DisplayMemberPath="Name" />
+    <TextBlock Style="{StaticResource Text.Small}" Margin="0,8,0,0"
+               Text="Участник получает доступ к проектам по назначенным в них ролям. Администратор и владелец видят все проекты организации." />
+  </StackPanel>
+</UserControl>

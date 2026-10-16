@@ -1,0 +1,53 @@
+<Window x:Class="DrawingFlow.Desktop.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="clr-namespace:DrawingFlow.Desktop.Behaviors"
+        xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+        mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        d:DataContext="{d:DesignInstance Type=vm:LoginViewModel}"
+        Title="DrawingFlow — вход" Width="440" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource Brush.Background}"
+        FontFamily="Segoe UI" FontSize="13">
+  <Border Style="{StaticResource Border.Card}" Margin="24" Padding="28">
+    <StackPanel>
+      <TextBlock Text="DrawingFlow" FontSize="26" FontWeight="SemiBold" Foreground="{StaticResource Brush.Accent}" />
+      <TextBlock Text="Управление проектной документацией" Style="{StaticResource Text.Muted}" Margin="0,2,0,20" />
+
+      <TextBlock Text="Адрес сервера" Style="{StaticResource Text.FieldLabel}" />
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBox Text="{Binding ServerAddress, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}"
+                 ToolTip="Например: https://drawingflow.company.local" />
+        <Button Grid.Column="1" Content="Проверить" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0"
+                Command="{Binding CheckServerCommand}" />
+      </Grid>
+
+      <TextBlock Text="Логин" Style="{StaticResource Text.FieldLabel}" />
+      <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" />
+
+      <TextBlock Text="Пароль" Style="{StaticResource Text.FieldLabel}" />
+      <PasswordBox x:Name="PasswordInput" b:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   IsEnabled="{Binding IsIdle}" />
+
+      <CheckBox Content="Запомнить меня на этом компьютере" IsChecked="{Binding RememberSession}" Margin="0,12,0,0"
+                ToolTip="Сессия сохраняется в зашифрованном виде (DPAPI) для текущего пользователя Windows" />
+
+      <Border Style="{StaticResource Border.InfoBanner}" Margin="0,14,0,0" Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibility}}">
+        <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource Text.Base}" />
+      </Border>
+      <Border Style="{StaticResource Border.ErrorBanner}" Margin="0,14,0,0" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+        <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" />
+      </Border>
+
+      <ProgressBar Style="{StaticResource ProgressBar.Thin}" Margin="0,12,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+
+      <Button Content="Войти" Style="{StaticResource Button.Primary}" Margin="0,16,0,0" MinHeight="38" IsDefault="True"
+              Command="{Binding LoginCommand}" />
+
+      <TextBlock Text="{Binding AppVersion}" Style="{StaticResource Text.Small}" Margin="0,16,0,0" HorizontalAlignment="Center" />
+    </StackPanel>
+  </Border>
+</Window>

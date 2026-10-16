@@ -1,0 +1,47 @@
+<Application x:Class="DrawingFlow.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             xmlns:pages="clr-namespace:DrawingFlow.Desktop.Views.Pages"
+             xmlns:dialogs="clr-namespace:DrawingFlow.Desktop.Views.Dialogs"
+             ShutdownMode="OnExplicitShutdown">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Resources/Styles.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Страницы -->
+      <DataTemplate DataType="{x:Type vm:DashboardViewModel}"><pages:DashboardView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:ProjectsViewModel}"><pages:ProjectsView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:ProjectDetailsViewModel}"><pages:ProjectDetailsView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:DocumentsViewModel}"><pages:DocumentsView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:DocumentDetailsViewModel}"><pages:DocumentDetailsView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:AgentsViewModel}"><pages:AgentsView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:SyncQueueViewModel}"><pages:SyncQueueView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:TasksViewModel}"><pages:TasksView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:OrganizationMembersViewModel}"><pages:OrganizationMembersView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:AuditViewModel}"><pages:AuditView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:AdministrationViewModel}"><pages:AdministrationView /></DataTemplate>
+      <DataTemplate DataType="{x:Type vm:SettingsViewModel}"><pages:SettingsView /></DataTemplate>
+
+      <!-- Диалоги -->
+      <DataTemplate DataType="{x:Type dvm:ProjectEditorDialogViewModel}"><dialogs:ProjectEditorDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:OrganizationMemberDialogViewModel}"><dialogs:OrganizationMemberDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:ProjectMemberDialogViewModel}"><dialogs:ProjectMemberDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:CreateUserDialogViewModel}"><dialogs:CreateUserDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:CreateOrganizationDialogViewModel}"><dialogs:CreateOrganizationDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:ChangePasswordDialogViewModel}"><dialogs:ChangePasswordDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:DocumentEditorDialogViewModel}"><dialogs:DocumentEditorDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:UploadVersionDialogViewModel}"><dialogs:UploadVersionDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:CompareVersionsDialogViewModel}"><dialogs:CompareVersionsDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:RegisterAgentDialogViewModel}"><dialogs:RegisterAgentDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:AgentKeyDialogViewModel}"><dialogs:AgentKeyDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:WatchedFolderDialogViewModel}"><dialogs:WatchedFolderDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:ResolveOperationDialogViewModel}"><dialogs:ResolveOperationDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:SubmitForReviewDialogViewModel}"><dialogs:SubmitForReviewDialog /></DataTemplate>
+      <DataTemplate DataType="{x:Type dvm:ReviewDecisionDialogViewModel}"><dialogs:ReviewDecisionDialog /></DataTemplate>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

@@ -1,0 +1,55 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Pages.AuditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=vm:AuditViewModel}">
+  <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Title}" Style="{StaticResource Text.PageTitle}" />
+
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.Card}" Padding="12" Margin="0,0,0,12">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Column="0" Text="{Binding ActionFilter, UpdateSourceTrigger=PropertyChanged}"
+                 ToolTip="Код действия, например project.created или user.logged_in">
+          <TextBox.InputBindings>
+            <KeyBinding Key="Return" Command="{Binding ApplyFilterCommand}" />
+          </TextBox.InputBindings>
+        </TextBox>
+        <Button Grid.Column="1" Content="Применить" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" Command="{Binding ApplyFilterCommand}" />
+        <Button Grid.Column="2" Content="Обновить" Style="{StaticResource Button.Link}" Margin="4,0,0,0" Command="{Binding RefreshCommand}" />
+      </Grid>
+    </Border>
+
+    <ProgressBar DockPanel.Dock="Top" Style="{StaticResource ProgressBar.Thin}" Margin="0,0,0,8" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.ErrorBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" />
+    </Border>
+
+    <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button Content="Назад" Style="{StaticResource Button.Secondary}" Command="{Binding PreviousPageCommand}" />
+        <Button Content="Вперёд" Style="{StaticResource Button.Secondary}" Margin="8,0,0,0" Command="{Binding NextPageCommand}" />
+      </StackPanel>
+      <TextBlock Text="{Binding PageInfo}" Style="{StaticResource Text.Muted}" VerticalAlignment="Center" />
+    </DockPanel>
+
+    <Grid>
+      <DataGrid ItemsSource="{Binding Events}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Время" Binding="{Binding OccurredAtUtc, Converter={StaticResource LocalDateTime}, ConverterParameter='dd.MM.yyyy HH:mm:ss'}" Width="150" />
+          <DataGridTextColumn Header="Пользователь" Binding="{Binding ActorName}" Width="200" />
+          <DataGridTextColumn Header="Действие" Binding="{Binding Action, Converter={StaticResource AuditAction}}" Width="240" />
+          <DataGridTextColumn Header="Объект" Binding="{Binding EntityType, Converter={StaticResource EntityType}}" Width="120" />
+          <DataGridTextColumn Header="Подробности" Binding="{Binding Details}" Width="*" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <TextBlock Text="Событий не найдено." Style="{StaticResource Text.Muted}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+    </Grid>
+  </DockPanel>
+</UserControl>

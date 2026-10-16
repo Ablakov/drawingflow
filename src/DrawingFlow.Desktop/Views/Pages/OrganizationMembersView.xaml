@@ -1,0 +1,60 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Pages.OrganizationMembersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             xmlns:b="clr-namespace:DrawingFlow.Desktop.Behaviors"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=vm:OrganizationMembersViewModel}">
+  <UserControl.Resources>
+    <b:BindingProxy x:Key="Proxy" Data="{Binding}" />
+  </UserControl.Resources>
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+        <Button Content="Создать пользователя" Style="{StaticResource Button.Secondary}" Command="{Binding CreateUserCommand}"
+                Visibility="{Binding CanCreateUsers, Converter={StaticResource BoolToVisibility}}" />
+        <Button Content="Добавить участника" Style="{StaticResource Button.Primary}" Margin="8,0,0,0" Command="{Binding AddMemberCommand}"
+                Visibility="{Binding CanManageMembers, Converter={StaticResource BoolToVisibility}}" />
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.PageTitle}" Margin="0" />
+        <TextBlock Text="{Binding Organization.Name}" Style="{StaticResource Text.Muted}" />
+      </StackPanel>
+    </DockPanel>
+
+    <ProgressBar DockPanel.Dock="Top" Style="{StaticResource ProgressBar.Thin}" Margin="0,0,0,8" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.ErrorBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Повторить" Style="{StaticResource Button.Link}" Command="{Binding RefreshCommand}" />
+        <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" VerticalAlignment="Center" />
+      </DockPanel>
+    </Border>
+
+    <Grid>
+      <DataGrid ItemsSource="{Binding Members}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Пользователь" Binding="{Binding DisplayName}" Width="*" />
+          <DataGridTextColumn Header="Логин" Binding="{Binding Login}" Width="150" />
+          <DataGridTextColumn Header="Эл. почта" Binding="{Binding Email}" Width="200" />
+          <DataGridTextColumn Header="Роль" Binding="{Binding Role, Converter={StaticResource DisplayName}}" Width="210" />
+          <DataGridTextColumn Header="Состояние" Binding="{Binding IsActive, Converter={StaticResource DisplayName}}" Width="110" />
+          <DataGridTextColumn Header="В организации с" Binding="{Binding JoinedAtUtc, Converter={StaticResource LocalDateTime}, ConverterParameter='dd.MM.yyyy'}" Width="130" />
+          <DataGridTemplateColumn Header="Действия" Width="190" Visibility="{Binding Data.CanManageMembers, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibility}}">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                  <Button Content="Изменить роль" Style="{StaticResource Button.RowAction}"
+                          Command="{Binding DataContext.ChangeRoleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                  <Button Content="Удалить" Style="{StaticResource Button.RowAction}" Foreground="{StaticResource Brush.Danger}"
+                          Command="{Binding DataContext.RemoveMemberCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                </StackPanel>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+      <TextBlock Text="В организации пока нет участников." Style="{StaticResource Text.Muted}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+    </Grid>
+  </DockPanel>
+</UserControl>

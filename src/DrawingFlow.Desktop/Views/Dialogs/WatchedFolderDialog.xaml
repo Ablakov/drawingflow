@@ -1,0 +1,45 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Dialogs.WatchedFolderDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=dvm:WatchedFolderDialogViewModel}">
+  <StackPanel>
+    <TextBlock Text="Проект" Style="{StaticResource Text.FieldLabel}" />
+    <ComboBox ItemsSource="{Binding Projects}" SelectedItem="{Binding SelectedProject}" IsEnabled="{Binding IsCreate}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate>
+          <TextBlock>
+            <Run Text="{Binding Code, Mode=OneWay}" /><Run Text=" — " /><Run Text="{Binding Name, Mode=OneWay}" />
+          </TextBlock>
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <TextBlock Text="Путь к папке на рабочей станции агента" Style="{StaticResource Text.FieldLabel}" />
+    <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" ToolTip="Локальный или сетевой путь, доступный службе агента, например D:\Проекты\КЖ или \\server\share\КЖ" />
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <StackPanel Grid.Column="0" Margin="0,0,8,0">
+        <TextBlock Text="Маски включения" Style="{StaticResource Text.FieldLabel}" />
+        <TextBox Text="{Binding IncludePatterns, UpdateSourceTrigger=PropertyChanged}" ToolTip="Через точку с запятой, например *.dwg;*.pdf" />
+      </StackPanel>
+      <StackPanel Grid.Column="1">
+        <TextBlock Text="Маски исключения" Style="{StaticResource Text.FieldLabel}" />
+        <TextBox Text="{Binding ExcludePatterns, UpdateSourceTrigger=PropertyChanged}" ToolTip="Например: *_backup*;черновики*" />
+      </StackPanel>
+    </Grid>
+    <TextBlock Text="Правило сопоставления файла с документом" Style="{StaticResource Text.FieldLabel}" />
+    <ComboBox ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule}" DisplayMemberPath="Name" />
+    <StackPanel Visibility="{Binding UsesNumberPattern, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="Шаблон номера документа (регулярное выражение с группой number)" Style="{StaticResource Text.FieldLabel}" />
+      <TextBox Text="{Binding DocumentNumberPattern, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas"
+               ToolTip="Пусто — номер до первого пробела или подчёркивания: ^(?&lt;number&gt;[^\s_]+)" />
+    </StackPanel>
+    <CheckBox Content="Автоматически регистрировать неизвестные документы" IsChecked="{Binding AutoRegisterUnknown}" Margin="0,12,0,0"
+              ToolTip="Файл с номером, которого нет в проекте, создаст новый документ. Без этой настройки такие файлы ждут ручного сопоставления." />
+    <CheckBox Content="Наблюдение включено" IsChecked="{Binding IsEnabled}" Margin="0,8,0,0" />
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,51 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Dialogs.CompareVersionsDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=dvm:CompareVersionsDialogViewModel}">
+  <StackPanel>
+    <Border Style="{StaticResource Border.InfoBanner}">
+      <TextBlock Text="{Binding Summary}" Style="{StaticResource Text.Base}" />
+    </Border>
+    <Grid Margin="0,4,0,6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Параметр" Style="{StaticResource Text.Small}" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="1" Text="{Binding LeftTitle}" Style="{StaticResource Text.Small}" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="2" Text="{Binding RightTitle}" Style="{StaticResource Text.Small}" FontWeight="SemiBold" />
+    </Grid>
+    <ItemsControl ItemsSource="{Binding Rows}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,1,0,0" Padding="0,6">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="{Binding Field}" Style="{StaticResource Text.Muted}" />
+              <TextBlock Grid.Column="1" Text="{Binding Left}" Style="{StaticResource Text.Base}" Margin="0,0,8,0" />
+              <TextBlock Grid.Column="2" Text="{Binding Right}" Margin="0,0,8,0">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Base}">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Differs}" Value="True">
+                        <Setter Property="Foreground" Value="{StaticResource Brush.Warning}" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

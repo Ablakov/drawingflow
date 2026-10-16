@@ -1,0 +1,15 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Dialogs.CreateOrganizationDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dvm="clr-namespace:DrawingFlow.Desktop.ViewModels.Dialogs"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=dvm:CreateOrganizationDialogViewModel}">
+  <StackPanel>
+    <TextBlock Text="Код организации" Style="{StaticResource Text.FieldLabel}" />
+    <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" ToolTip="Латинские буквы, цифры, точка, подчёркивание, дефис" />
+    <TextBlock Text="Название" Style="{StaticResource Text.FieldLabel}" />
+    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+    <TextBlock Text="Логин владельца (необязательно)" Style="{StaticResource Text.FieldLabel}" />
+    <TextBox Text="{Binding OwnerLogin, UpdateSourceTrigger=PropertyChanged}" ToolTip="Если не указан, владельцем станете вы" />
+  </StackPanel>
+</UserControl>

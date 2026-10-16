@@ -1,0 +1,154 @@
+<UserControl x:Class="DrawingFlow.Desktop.Views.Pages.AgentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DrawingFlow.Desktop.ViewModels"
+             xmlns:b="clr-namespace:DrawingFlow.Desktop.Behaviors"
+             mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=vm:AgentsViewModel}">
+  <UserControl.Resources>
+    <b:BindingProxy x:Key="Proxy" Data="{Binding}" />
+  </UserControl.Resources>
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+        <Button Content="Очередь синхронизации" Style="{StaticResource Button.Secondary}" Command="{Binding OpenQueueCommand}" />
+        <Button Content="Зарегистрировать агента" Style="{StaticResource Button.Primary}" Margin="8,0,0,0" Command="{Binding RegisterAgentCommand}"
+                Visibility="{Binding CanManage, Converter={StaticResource BoolToVisibility}}" />
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Text="{Binding Title}" Style="{StaticResource Text.PageTitle}" Margin="0" />
+        <TextBlock Style="{StaticResource Text.Muted}" Text="Агент — служба Windows на рабочей станции, которая следит за папками и загружает новые версии файлов на сервер." />
+      </StackPanel>
+    </DockPanel>
+
+    <ProgressBar DockPanel.Dock="Top" Style="{StaticResource ProgressBar.Thin}" Margin="0,0,0,8" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+    <Border DockPanel.Dock="Top" Style="{StaticResource Border.ErrorBanner}" Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Повторить" Style="{StaticResource Button.Link}" Command="{Binding RefreshCommand}" />
+        <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource Text.Error}" VerticalAlignment="Center" />
+      </DockPanel>
+    </Border>
+
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="2*" />
+        <ColumnDefinition Width="3*" />
+      </Grid.ColumnDefinitions>
+
+      <!-- Агенты -->
+      <DockPanel Grid.Column="0" Margin="0,0,12,0">
+        <TextBlock DockPanel.Dock="Top" Text="Агенты" Style="{StaticResource Text.SectionTitle}" />
+        <Grid>
+          <DataGrid ItemsSource="{Binding Agents}" SelectedItem="{Binding SelectedAgent}">
+            <DataGrid.Columns>
+              <DataGridTemplateColumn Header="Название" Width="*">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                      <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                        <Ellipse.Style>
+                          <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="{StaticResource Brush.TextMuted}" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource Brush.Success}" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding IsRevoked}" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource Brush.Danger}" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Ellipse.Style>
+                      </Ellipse>
+                      <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTextColumn Header="Компьютер" Binding="{Binding MachineName}" Width="120" />
+              <DataGridTextColumn Header="Связь" Binding="{Binding LastHeartbeatAtUtc, Converter={StaticResource LocalDateTime}, ConverterParameter='dd.MM HH:mm'}" Width="100" />
+              <DataGridTextColumn Header="Ошибки" Binding="{Binding FailedOperations}" Width="70" />
+              <DataGridTextColumn Header="Папки" Binding="{Binding FolderCount}" Width="60" />
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBlock Text="Агенты ещё не зарегистрированы. Зарегистрируйте агента, установите службу на рабочей станции и укажите ключ." Style="{StaticResource Text.Muted}"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24" TextAlignment="Center" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+        </Grid>
+      </DockPanel>
+
+      <!-- Выбранный агент и папки -->
+      <DockPanel Grid.Column="1" Visibility="{Binding HasSelectedAgent, Converter={StaticResource BoolToVisibility}}">
+        <Border DockPanel.Dock="Top" Style="{StaticResource Border.Card}" Margin="0,0,0,12">
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+              <Button Content="Отозвать ключ" Style="{StaticResource Button.Danger}" Command="{Binding RevokeAgentCommand}" CommandParameter="{Binding SelectedAgent}"
+                      Visibility="{Binding CanConfigureSelected, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Text="{Binding SelectedAgent.Name}" FontSize="17" FontWeight="SemiBold" />
+              <TextBlock Style="{StaticResource Text.Small}">
+                <Run Text="Ключ:" /><Run Text=" " /><Run Text="{Binding SelectedAgent.CredentialPrefix, Mode=OneWay}" /><Run Text="…" />
+                <Run Text=" · версия агента:" /><Run Text=" " /><Run Text="{Binding SelectedAgent.AgentVersion, Mode=OneWay, TargetNullValue='—'}" />
+                <Run Text=" · зарегистрирован:" /><Run Text=" " /><Run Text="{Binding SelectedAgent.CreatedAtUtc, Converter={StaticResource LocalDateTime}, Mode=OneWay}" />
+              </TextBlock>
+              <TextBlock Style="{StaticResource Text.Small}" Margin="0,4,0,0">
+                <Run Text="Очередь агента: ожидают" /><Run Text=" " /><Run Text="{Binding SelectedAgent.PendingOperations, Mode=OneWay}" />
+                <Run Text=", ошибок" /><Run Text=" " /><Run Text="{Binding SelectedAgent.FailedOperations, Mode=OneWay}" />
+                <Run Text=", требуют разрешения" /><Run Text=" " /><Run Text="{Binding SelectedAgent.UnresolvedOperations, Mode=OneWay}" />
+              </TextBlock>
+              <TextBlock Text="Ключ отозван: агент не имеет доступа к серверу." Style="{StaticResource Text.Error}" Margin="0,6,0,0"
+                         Visibility="{Binding SelectedAgent.IsRevoked, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+          <Button DockPanel.Dock="Right" Content="Добавить папку" Style="{StaticResource Button.Primary}" Command="{Binding AddFolderCommand}"
+                  Visibility="{Binding CanConfigureSelected, Converter={StaticResource BoolToVisibility}}" />
+          <TextBlock Text="Папки наблюдения" Style="{StaticResource Text.SectionTitle}" Margin="0" VerticalAlignment="Center" />
+        </DockPanel>
+
+        <Grid>
+          <DataGrid ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Папка" Binding="{Binding Path}" Width="*" />
+              <DataGridTextColumn Header="Проект" Binding="{Binding ProjectCode}" Width="100" />
+              <DataGridTextColumn Header="Маски" Binding="{Binding IncludePatterns}" Width="120" />
+              <DataGridTextColumn Header="Правило" Binding="{Binding MatchingRule, Converter={StaticResource DisplayName}}" Width="170" />
+              <DataGridCheckBoxColumn Header="Авторег." Binding="{Binding AutoRegisterUnknown}" Width="70" />
+              <DataGridCheckBoxColumn Header="Вкл." Binding="{Binding IsEnabled}" Width="50" />
+              <DataGridTemplateColumn Header="Действия" Width="150" Visibility="{Binding Data.CanManage, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibility}}">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                      <Button Content="Изменить" Style="{StaticResource Button.RowAction}"
+                              Command="{Binding DataContext.EditFolderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                      <Button Content="Удалить" Style="{StaticResource Button.RowAction}" Foreground="{StaticResource Brush.Danger}"
+                              Command="{Binding DataContext.DeleteFolderCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBlock Text="Для этого агента папки не настроены." HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Muted}">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                      <Condition Binding="{Binding FoldersLoaded}" Value="True" />
+                      <Condition Binding="{Binding Folders.Count}" Value="0" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Visibility" Value="Visible" />
+                  </MultiDataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </Grid>
+      </DockPanel>
+    </Grid>
+  </DockPanel>
+</UserControl>

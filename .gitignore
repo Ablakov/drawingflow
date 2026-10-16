@@ -1,0 +1,21 @@
+# Сборка
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+*.swp
+.DS_Store
+
+# Локальные данные разработки
+.local/
+*.log
+TestResults/
+
+# Секреты и локальные настройки
+appsettings.*.local.json
+*.pfx
+
+# Резервные копии, создаваемые scripts/backup.sh
+backups/
