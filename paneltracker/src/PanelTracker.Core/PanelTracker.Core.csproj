@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>PanelTracker.Core</RootNamespace>
+    <AssemblyName>PanelTracker.Core</AssemblyName>
+  </PropertyGroup>
+</Project>

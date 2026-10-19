@@ -1,0 +1,19 @@
+<Project>
+  <!-- Отдельное решение Panel Tracker: не наследует настройки DrawingFlow из корня репозитория. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>ru</SatelliteResourceLanguages>
+    <Company>Panel Tracker</Company>
+    <Product>Panel Tracker</Product>
+    <Version>0.1.0</Version>
+    <NeutralLanguage>ru-RU</NeutralLanguage>
+  </PropertyGroup>
+</Project>

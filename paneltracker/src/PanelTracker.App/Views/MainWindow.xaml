@@ -1,0 +1,447 @@
+<Window x:Class="PanelTracker.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:PanelTracker.App.Views"
+        Title="Panel Tracker" Width="1280" Height="820" MinWidth="900" MinHeight="560"
+        WindowStartupLocation="CenterScreen" FontSize="13">
+  <Window.Resources>
+    <views:BindingProxy x:Key="Proxy" Data="{Binding}" />
+  </Window.Resources>
+  <Window.InputBindings>
+    <KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
+  </Window.InputBindings>
+
+  <DockPanel>
+    <!-- Верхняя панель: папка проекта и действия -->
+    <Border DockPanel.Dock="Top" Background="#F3F4F6" BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="10,8">
+      <DockPanel>
+        <Button DockPanel.Dock="Left" Content="Выбрать папку проекта…" Command="{Binding ChooseFolderCommand}" Style="{StaticResource ToolbarButton}" />
+        <Button DockPanel.Dock="Right" Content="Обновить (F5)" Command="{Binding RefreshCommand}" Style="{StaticResource ToolbarButton}" Margin="6,0,0,0" />
+        <Button DockPanel.Dock="Right" Content="Создать папки статусов" Command="{Binding CreateStatusFoldersCommand}" IsEnabled="{Binding IsProjectOpen}" Style="{StaticResource ToolbarButton}" />
+        <Button DockPanel.Dock="Right" Content="Открыть папку" Command="{Binding OpenRootFolderCommand}" IsEnabled="{Binding IsProjectOpen}" Style="{StaticResource ToolbarButton}" />
+        <TextBlock VerticalAlignment="Center" Margin="6,0" TextTrimming="CharacterEllipsis">
+          <Run Text="Проект:" Foreground="#666" />
+          <Run Text="{Binding RootFolder, Mode=OneWay, TargetNullValue='— не выбран —'}" FontWeight="SemiBold" />
+        </TextBlock>
+      </DockPanel>
+    </Border>
+
+    <!-- Счётчики и прогресс -->
+    <Border DockPanel.Dock="Top" Background="White" BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="10,8,10,6">
+      <StackPanel>
+        <WrapPanel>
+          <Button Command="{Binding ClearFiltersCommand}" Margin="0,0,8,6" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="Сбросить фильтры">
+            <Border BorderBrush="#1F2937" BorderThickness="0,0,0,4" Padding="12,4" Background="#FAFAFA" CornerRadius="3" MinWidth="90">
+              <StackPanel>
+                <TextBlock Text="Всего панелей" FontSize="11" Style="{StaticResource Muted}" />
+                <TextBlock Text="{Binding Total}" FontSize="18" FontWeight="SemiBold" />
+              </StackPanel>
+            </Border>
+          </Button>
+          <ItemsControl ItemsSource="{Binding Counters}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Command="{Binding Data.FilterByStatusCommand, Source={StaticResource Proxy}}" CommandParameter="{Binding Status}"
+                        Margin="0,0,8,6" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                        ToolTip="Щёлкните, чтобы показать только панели этого статуса; повторный щелчок снимает фильтр">
+                  <Border BorderBrush="{Binding Color, Converter={StaticResource HexToBrush}}" BorderThickness="0,0,0,4" Padding="12,4" Background="#FAFAFA" CornerRadius="3" MinWidth="120">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Name}" FontSize="11" Style="{StaticResource Muted}" />
+                      <TextBlock Text="{Binding Label}" FontSize="18" FontWeight="SemiBold" />
+                    </StackPanel>
+                  </Border>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border BorderBrush="#F59E0B" BorderThickness="0,0,0,4" Padding="12,4" Background="#FFFBEB" CornerRadius="3" MinWidth="90" Margin="0,0,8,6"
+                  Visibility="{Binding DuplicateCount, Converter={StaticResource DuplicateVisibility}}">
+            <StackPanel>
+              <TextBlock Text="Дубликаты" FontSize="11" Style="{StaticResource Muted}" />
+              <TextBlock Text="{Binding DuplicateCount}" FontSize="18" FontWeight="SemiBold" />
+            </StackPanel>
+          </Border>
+        </WrapPanel>
+        <Grid Margin="0,2,0,0">
+          <ProgressBar Minimum="0" Maximum="100" Value="{Binding SentPercent, Mode=OneWay}" Height="22" Foreground="#22A95A" Background="#E5E7EB" BorderThickness="0" />
+          <TextBlock Text="{Binding ProgressText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" />
+        </Grid>
+      </StackPanel>
+    </Border>
+
+    <!-- Строка состояния -->
+    <StatusBar DockPanel.Dock="Bottom">
+      <StatusBarItem>
+        <TextBlock Text="{Binding StatusMessage}" />
+      </StatusBarItem>
+      <Separator />
+      <StatusBarItem>
+        <TextBlock Text="{Binding MissingFoldersText}" Foreground="#B45309" Visibility="{Binding MissingFoldersText, Converter={StaticResource StringNotEmptyToVisibility}}" />
+      </StatusBarItem>
+      <StatusBarItem HorizontalAlignment="Right">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="{Binding WatcherText}" Style="{StaticResource Muted}" Margin="0,0,16,0" />
+          <TextBlock Text="{Binding LastScanText}" Style="{StaticResource Muted}" />
+        </StackPanel>
+      </StatusBarItem>
+    </StatusBar>
+
+    <TabControl Margin="0">
+      <!-- ДОСКА -->
+      <TabItem Header="Доска">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Padding="8,6" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Style="{StaticResource Muted}">
+                <Run Text="Показано:" /><Run Text="{Binding VisibleCount, Mode=OneWay}" />
+                <Run Text=" из " /><Run Text="{Binding Total, Mode=OneWay}" />
+                <Run Text="; выделено:" /><Run Text="{Binding SelectedCount, Mode=OneWay}" />
+              </TextBlock>
+              <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,6,0" />
+              <TextBox Width="180" VerticalContentAlignment="Center" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="Часть идентификатора панели или имени файла" />
+              <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="12,0,6,0" />
+              <ComboBox Width="220" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}" />
+              <TextBlock Text="Группа:" VerticalAlignment="Center" Margin="12,0,6,0" />
+              <ComboBox Width="200" ItemsSource="{Binding GroupFilters}" SelectedItem="{Binding SelectedGroupFilter}" />
+              <Button Content="Сбросить" Command="{Binding ClearFiltersCommand}" Margin="12,0,0,0" Padding="10,2" />
+              <Button Content="Выделить все видимые" Command="{Binding SelectAllVisibleCommand}" Margin="8,0,0,0" Padding="10,2" ToolTip="Ctrl+A" />
+            </DockPanel>
+          </Border>
+
+          <ListBox x:Name="Board" ItemsSource="{Binding PanelsView}" SelectionMode="Extended"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   BorderThickness="0" Background="White" Padding="6"
+                   SelectionChanged="Board_SelectionChanged"
+                   PreviewMouseRightButtonDown="Board_PreviewMouseRightButtonDown"
+                   MouseDoubleClick="Board_MouseDoubleClick">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+              <Style TargetType="ListBoxItem">
+                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                      <Border x:Name="Frame" BorderThickness="3" BorderBrush="Transparent" CornerRadius="7" Margin="2">
+                        <ContentPresenter />
+                      </Border>
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter TargetName="Frame" Property="BorderBrush" Value="#9CA3AF" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                          <Setter TargetName="Frame" Property="BorderBrush" Value="#111827" />
+                        </Trigger>
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Border Width="84" Height="52" CornerRadius="4" Background="{Binding Color, Converter={StaticResource HexToBrush}}" ToolTip="{Binding ToolTipText}">
+                  <Grid>
+                    <TextBlock Text="{Binding Id}" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,6"
+                               Foreground="{Binding Color, Converter={StaticResource ContrastForeground}}" />
+                    <TextBlock Text="{Binding RevisionLabel}" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,5,0"
+                               Foreground="{Binding Color, Converter={StaticResource ContrastForeground}}"
+                               Visibility="{Binding RevisionLabel, Converter={StaticResource StringNotEmptyToVisibility}}" />
+                    <TextBlock Text="⚠" FontSize="11" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,1,0,0"
+                               Foreground="{Binding Color, Converter={StaticResource ContrastForeground}}"
+                               Visibility="{Binding IsDuplicate, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="🔒" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,3"
+                               Visibility="{Binding IsHold, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="!" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,2"
+                               Foreground="{Binding Color, Converter={StaticResource ContrastForeground}}"
+                               Visibility="{Binding IsProblem, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="{Binding GroupsLabel}" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="5,0,0,3"
+                               Foreground="{Binding Color, Converter={StaticResource ContrastForeground}}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ContextMenu>
+              <ContextMenu DataContext="{Binding Data, Source={StaticResource Proxy}}">
+                <MenuItem Header="Открыть файл" Command="{Binding OpenFileCommand}" InputGestureText="Двойной щелчок" />
+                <MenuItem Header="Открыть расположение файла" Command="{Binding OpenLocationCommand}" />
+                <Separator />
+                <MenuItem Header="Перевести в статус" ItemsSource="{Binding Statuses}">
+                  <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                      <Setter Property="Command" Value="{Binding Data.MoveToStatusCommand, Source={StaticResource Proxy}}" />
+                      <Setter Property="CommandParameter" Value="{Binding}" />
+                    </Style>
+                  </MenuItem.ItemContainerStyle>
+                  <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal">
+                        <Rectangle Width="14" Height="14" RadiusX="2" RadiusY="2" Margin="0,0,8,0" Fill="{Binding Color, Converter={StaticResource HexToBrush}}" />
+                        <TextBlock Text="{Binding Name}" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </MenuItem.ItemTemplate>
+                </MenuItem>
+                <MenuItem Header="Заблокировать (HOLD)" Command="{Binding HoldCommand}" />
+                <MenuItem Header="Снять блокировку" Command="{Binding ReleaseCommand}" />
+                <MenuItem Header="Отметить «Проблема»…" Command="{Binding MarkProblemCommand}" />
+                <Separator />
+                <MenuItem Header="Добавить в группу" ItemsSource="{Binding Groups}">
+                  <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                      <Setter Property="Command" Value="{Binding Data.AddToGroupCommand, Source={StaticResource Proxy}}" />
+                      <Setter Property="CommandParameter" Value="{Binding}" />
+                    </Style>
+                  </MenuItem.ItemContainerStyle>
+                  <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                  </MenuItem.ItemTemplate>
+                </MenuItem>
+                <MenuItem Header="Убрать из группы" ItemsSource="{Binding Groups}">
+                  <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                      <Setter Property="Command" Value="{Binding Data.RemoveFromGroupCommand, Source={StaticResource Proxy}}" />
+                      <Setter Property="CommandParameter" Value="{Binding}" />
+                    </Style>
+                  </MenuItem.ItemContainerStyle>
+                  <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                  </MenuItem.ItemTemplate>
+                </MenuItem>
+              </ContextMenu>
+            </ListBox.ContextMenu>
+          </ListBox>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ДУБЛИКАТЫ -->
+      <TabItem Header="Дубликаты">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Margin="8,6" TextWrapping="Wrap" Style="{StaticResource Muted}"
+                     Text="Панели, файлы которых лежат в двух и более папках статусов одновременно. Статус на доске определяет файл со старшей ревизией (при равенстве — изменённый позже). Удалите или переместите лишний файл." />
+          <DataGrid ItemsSource="{Binding DuplicateRows}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                    HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0" Margin="8,0,8,8">
+            <DataGrid.Columns>
+              <DataGridTemplateColumn Width="30">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Rectangle Width="14" Height="14" RadiusX="2" RadiusY="2" Fill="{Binding Color, Converter={StaticResource HexToBrush}}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTextColumn Header="Панель" Binding="{Binding PanelId}" Width="100" />
+              <DataGridTextColumn Header="Статус (папка)" Binding="{Binding StatusName}" Width="200" />
+              <DataGridTextColumn Header="Файл" Binding="{Binding FileName}" Width="220" />
+              <DataGridTextColumn Header="Изменён" Binding="{Binding ModifiedLocal, StringFormat=dd.MM.yyyy HH:mm}" Width="140" />
+              <DataGridTextColumn Header="Путь" Binding="{Binding FullPath}" Width="*" />
+              <DataGridTemplateColumn Width="180">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Content="Открыть расположение" Padding="8,2" Margin="2"
+                            Command="{Binding Data.OpenPathCommand, Source={StaticResource Proxy}}" CommandParameter="{Binding FullPath}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ИСТОРИЯ -->
+      <TabItem Header="История">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Padding="8,6" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
+            <DockPanel>
+              <TextBlock Text="Панель:" VerticalAlignment="Center" Margin="0,0,6,0" />
+              <TextBox Width="200" VerticalContentAlignment="Center" Text="{Binding HistoryFilter, UpdateSourceTrigger=PropertyChanged}" ToolTip="Фильтр по идентификатору панели или имени файла" />
+              <TextBlock VerticalAlignment="Center" Margin="12,0,0,0" Style="{StaticResource Muted}" Text="Журнал хранится в файле history.jsonl в корне проекта. Новые записи сверху." />
+            </DockPanel>
+          </Border>
+          <DataGrid ItemsSource="{Binding HistoryView}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                    HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0" Margin="8,0,8,8">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Когда" Binding="{Binding Time}" Width="150" />
+              <DataGridTextColumn Header="Кто" Binding="{Binding User}" Width="120" />
+              <DataGridTextColumn Header="Панель" Binding="{Binding PanelId}" Width="90" />
+              <DataGridTextColumn Header="Файл" Binding="{Binding FileName}" Width="160" />
+              <DataGridTextColumn Header="Откуда" Binding="{Binding FromStatus}" Width="180" />
+              <DataGridTextColumn Header="Куда" Binding="{Binding ToStatus}" Width="180" />
+              <DataGridTextColumn Header="Действие" Binding="{Binding ActionName}" Width="170" />
+              <DataGridTextColumn Header="Комментарий" Binding="{Binding Comment}" Width="*" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ГРУППЫ -->
+      <TabItem Header="Группы">
+        <Grid Margin="8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <DockPanel Grid.Column="0" Margin="0,0,12,0">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+              <Button Content="Добавить…" Command="{Binding AddGroupCommand}" IsEnabled="{Binding IsProjectOpen}" Padding="10,3" Margin="0,0,6,0" />
+              <Button Content="Переименовать…" Command="{Binding RenameGroupCommand}" Padding="10,3" Margin="0,0,6,0" />
+              <Button Content="Удалить" Command="{Binding DeleteGroupCommand}" Padding="10,3" />
+            </StackPanel>
+            <TextBlock DockPanel.Dock="Bottom" Margin="0,6,0,0" TextWrapping="Wrap" Style="{StaticResource Muted}"
+                       Text="Группы хранятся в groups.json в корне проекта. Добавлять панели в группы удобнее через контекстное меню плитки на доске." />
+            <ListBox ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="2">
+                    <Run Text="{Binding DisplayName, Mode=OneWay}" FontWeight="SemiBold" />
+                    <Run Text=" — панелей: " Foreground="#666" /><Run Text="{Binding Count, Mode=OneWay}" Foreground="#666" />
+                  </TextBlock>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+          <DockPanel Grid.Column="1">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
+              <TextBlock Text="Панели группы:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold" />
+              <Button Content="Добавить выделенные на доске" Command="{Binding AddSelectedToGroupCommand}" Padding="10,3" Margin="0,0,6,0" />
+              <Button Content="Убрать выбранную панель" Command="{Binding RemoveMemberCommand}" CommandParameter="{Binding SelectedGroupMember}" Padding="10,3" />
+            </StackPanel>
+            <ListBox ItemsSource="{Binding SelectedGroup.Members}" SelectedItem="{Binding SelectedGroupMember}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel />
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Border Padding="8,4" Margin="2" Background="#F3F4F6" CornerRadius="3">
+                    <TextBlock Text="{Binding}" />
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Grid>
+      </TabItem>
+
+      <!-- СТАТИСТИКА -->
+      <TabItem Header="Статистика">
+        <DockPanel Margin="12">
+          <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Style="{StaticResource Muted}" Margin="0,0,0,10"
+                     Text="Сколько панелей каждой группы находится в каждом статусе. Панель, состоящая в нескольких группах, учитывается в каждой из них." />
+          <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+              <Border BorderBrush="#D1D5DB" BorderThickness="0,0,0,1" Padding="0,0,0,4" Margin="0,0,0,2">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Width="220" Text="Группа" FontWeight="SemiBold" VerticalAlignment="Bottom" />
+                  <ItemsControl ItemsSource="{Binding Counters}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Width="130" BorderBrush="{Binding Color, Converter={StaticResource HexToBrush}}" BorderThickness="0,0,0,4" Padding="4,0,4,2" Margin="0,0,4,0">
+                          <TextBlock Text="{Binding Name}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Bottom" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Width="80" Text="Всего" FontWeight="SemiBold" VerticalAlignment="Bottom" TextAlignment="Right" Margin="8,0,0,0" />
+                  <TextBlock Width="140" Text="Отправлено" FontWeight="SemiBold" VerticalAlignment="Bottom" TextAlignment="Right" Margin="8,0,0,0" />
+                </StackPanel>
+              </Border>
+              <ItemsControl ItemsSource="{Binding StatisticsRows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="0,5">
+                      <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                          <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsTotal}" Value="True">
+                                <Setter Property="TextBlock.FontWeight" Value="SemiBold" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </StackPanel.Style>
+                        <TextBlock Width="220" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                        <ItemsControl ItemsSource="{Binding Cells}">
+                          <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                              <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                          </ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                              <TextBlock Width="130" Text="{Binding Count}" Padding="4,0" Margin="0,0,4,0" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Width="80" Text="{Binding Total}" TextAlignment="Right" Margin="8,0,0,0" />
+                        <TextBlock Width="140" Text="{Binding SentText}" TextAlignment="Right" Margin="8,0,0,0" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
+      <!-- НАСТРОЙКИ -->
+      <TabItem Header="Настройки">
+        <DockPanel Margin="12">
+          <StackPanel DockPanel.Dock="Top">
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+              <Run FontWeight="SemiBold" Text="Как это работает." />
+              <Run Text="Статус панели равен папке, в которой лежит её PDF. Имя файла без расширения — идентификатор панели (N021, W046, S177). Суффикс ревизии (N021_R2.pdf) учитывается: актуальной считается старшая ревизия. Набор статусов, порядок, цвета и имена папок задаются в файле settings.json рядом с программой." />
+            </TextBlock>
+            <DockPanel Margin="0,0,0,10">
+              <Button DockPanel.Dock="Right" Content="Перечитать настройки" Command="{Binding ReloadSettingsCommand}" Padding="10,3" Margin="6,0,0,0" />
+              <Button DockPanel.Dock="Right" Content="Открыть settings.json" Command="{Binding OpenSettingsFileCommand}" Padding="10,3" />
+              <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                <Run Text="Файл настроек:" Foreground="#666" />
+                <Run Text="{Binding SettingsPath, Mode=OneWay}" />
+              </TextBlock>
+            </DockPanel>
+            <TextBlock Text="Статусы (порядок = порядок в settings.json):" FontWeight="SemiBold" Margin="0,0,0,4" />
+          </StackPanel>
+          <DataGrid ItemsSource="{Binding Statuses}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                    HeadersVisibility="Column" GridLinesVisibility="Horizontal" VerticalAlignment="Top">
+            <DataGrid.Columns>
+              <DataGridTemplateColumn Width="40">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Rectangle Width="18" Height="18" RadiusX="3" RadiusY="3" Fill="{Binding Color, Converter={StaticResource HexToBrush}}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTextColumn Header="Ключ" Binding="{Binding Key}" Width="160" />
+              <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="240" />
+              <DataGridTextColumn Header="Папка" Binding="{Binding Folder}" Width="240" />
+              <DataGridTextColumn Header="Цвет" Binding="{Binding Color}" Width="90" />
+              <DataGridTextColumn Header="Роль" Binding="{Binding Role, Converter={StaticResource RoleName}}" Width="160" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

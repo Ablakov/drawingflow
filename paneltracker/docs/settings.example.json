@@ -1,0 +1,16 @@
+{
+  "rootFolder": "D:\\Projects\\Tower-A\\Panels",
+  "fileExtensions": [".pdf"],
+  "includeSubfolders": false,
+  "rescanIntervalSeconds": 10,
+  "debounceMilliseconds": 600,
+  "userName": null,
+  "statuses": [
+    { "key": "ready_to_check",      "name": "Готово к проверке",          "folder": "01 Ready to Check",      "color": "#F2A93B", "role": "normal" },
+    { "key": "ready_to_back_check", "name": "Готово к обратной проверке", "folder": "02 Ready to Back Check", "color": "#3B82F6", "role": "normal" },
+    { "key": "ready_to_send",       "name": "Готово к отправке",          "folder": "03 Ready to Send",       "color": "#8B5CF6", "role": "normal" },
+    { "key": "sent",                "name": "Отправлено заказчику",       "folder": "04 Sent to client",      "color": "#22A95A", "role": "sent" },
+    { "key": "problem",             "name": "Проблема",                   "folder": "05 Problem",             "color": "#E5484D", "role": "problem" },
+    { "key": "hold",                "name": "HOLD (заблокировано)",       "folder": "06 Locked",              "color": "#6B7280", "role": "hold" }
+  ]
+}
