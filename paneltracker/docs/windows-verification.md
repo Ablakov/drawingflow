@@ -6,7 +6,7 @@ WPF-приложение на macOS не запускается, поэтому 
 
 ## Подготовка
 
-1. `dotnet run --project paneltracker/src/PanelTracker.App` **или** запуск опубликованного `PanelTracker.exe`.
+1. Из папки с `PanelTracker.sln`: `dotnet run --project src/PanelTracker.App` **или** запуск опубликованного `PanelTracker.exe`.
 2. Создайте пустую папку, например `C:\Temp\Panels`.
 3. В программе: «Выбрать папку проекта…» → `C:\Temp\Panels` → «Создать папки статусов».
    - [ ] В папке появились `01 Ready to Check` … `06 Locked`.

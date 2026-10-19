@@ -97,14 +97,17 @@ paneltracker/
 └── docs/                           settings.example.json, windows-verification.md
 ```
 
-Решение самостоятельное: `Directory.Build.props` и `Directory.Packages.props` в этой папке не наследуют настройки
-DrawingFlow из корня репозитория. Сборка идёт с `TreatWarningsAsErrors`.
+Решение самостоятельное: `Directory.Build.props` и `Directory.Packages.props` в этой папке не наследуют никаких
+внешних настроек (в том числе DrawingFlow, если папка лежит внутри его репозитория). Сборка идёт с `TreatWarningsAsErrors`.
 
 ## Запуск на Windows
 
 Нужен [.NET SDK 10](https://dotnet.microsoft.com/download/dotnet/10.0) (для `dotnet run`) — либо только готовый exe (см. ниже).
+Все команды ниже выполняются из папки с `PanelTracker.sln` (отдельный репозиторий
+[github.com/Ablakov/paneltracker](https://github.com/Ablakov/paneltracker) или подпапка `paneltracker/` в DrawingFlow).
 
 ```bash
+git clone https://github.com/Ablakov/paneltracker.git
 cd paneltracker
 dotnet run --project src/PanelTracker.App
 ```
@@ -112,7 +115,7 @@ dotnet run --project src/PanelTracker.App
 Тесты ядра (на любой ОС):
 
 ```bash
-dotnet test paneltracker/PanelTracker.sln
+dotnet test PanelTracker.sln
 ```
 
 ### Сборка одним exe
@@ -121,17 +124,17 @@ dotnet test paneltracker/PanelTracker.sln
 уже заданы в проекте:
 
 ```bash
-dotnet publish paneltracker/src/PanelTracker.App -c Release -r win-x64 -o paneltracker/publish/win-x64
+dotnet publish src/PanelTracker.App -c Release -r win-x64 -o publish/win-x64
 ```
 
-Результат — `paneltracker/publish/win-x64/PanelTracker.exe`. Скопируйте его в любую папку с правами на запись и запустите;
+Результат — `publish/win-x64/PanelTracker.exe`. Скопируйте его в любую папку с правами на запись и запустите;
 рядом появится `settings.json`.
 
 Вариант поменьше (~1 МБ), требует установленного
 [.NET Desktop Runtime 10 x64](https://dotnet.microsoft.com/download/dotnet/10.0):
 
 ```bash
-dotnet publish paneltracker/src/PanelTracker.App -c Release -r win-x64 --self-contained false -o paneltracker/publish/win-x64-fdd
+dotnet publish src/PanelTracker.App -c Release -r win-x64 --self-contained false -o publish/win-x64-fdd
 ```
 
 Обе команды выполняются и на macOS/Linux (в проекте включён `EnableWindowsTargeting`), но запустить WPF-программу
